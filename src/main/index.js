@@ -18,9 +18,18 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 880,
     useContentSize: true,
-    width: 1000
+    width: 1550,
+    frame: false,
+    transparent: true,
+    backgroundColor: '#00000000',
+
+    webPreferences: {
+      devTools: true,
+      nodeIntegration: true,
+      enablemotemodule: true
+    }
   })
 
   mainWindow.loadURL(winURL)
