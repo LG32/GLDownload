@@ -24,11 +24,14 @@ function createWindow () {
     frame: false,
     transparent: true,
     backgroundColor: '#00000000',
-
+    resizable: false,
+    fullscreen: false,
+    fullscreenable: false,
+    maximizable: false,
     webPreferences: {
       devTools: true,
       nodeIntegration: true,
-      enablemotemodule: true
+      enablemotemodule: true,
     }
   })
 
