@@ -88,28 +88,6 @@ export default class Api {
     // TODO
   }
 
-  // savePreferenceToNativeStore (params = {}) {
-  //   const { user, system, others } = separateConfig(params)
-  //   const config = {}
-  //
-  //   if (!isEmpty(user)) {
-  //     console.info('[Motrix] save user config: ', user)
-  //     config.user = user
-  //   }
-  //
-  //   if (!isEmpty(system)) {
-  //     console.info('[Motrix] save system config: ', system)
-  //     config.system = system
-  //     this.updateActiveTaskOption(system)
-  //   }
-  //
-  //   if (!isEmpty(others)) {
-  //     console.info('[Motrix] save config found illegal key: ', others)
-  //   }
-  //
-  //   ipcRenderer.send('command', 'application:save-preference', config)
-  // }
-
   getVersion () {
     return this.client.call('getVersion')
   }
@@ -136,6 +114,7 @@ export default class Api {
     return new Promise((resolve) => {
       this.client.call('getOption', ...args)
         .then((data) => {
+          console.log('getOption:', data)
           resolve(changeKeysToCamelCase(data))
         })
     })
@@ -214,11 +193,13 @@ export default class Api {
         ['aria2.tellActive', ...activeArgs],
         ['aria2.tellWaiting', ...waitingArgs]
       ]).then((data) => {
-        console.log('[Motrix] fetch downloading task list data:', data)
-        const result = mergeTaskResult(data)
-        resolve(result)
+        console.log('[GLD] fetch downloading task list data:', data)
+        // const result = mergeTaskResult(data)
+        const info = data[0][0][0]
+        console.log('[GLD] fetch downloading data:', info)
+        resolve(info)
       }).catch((err) => {
-        console.log('[Motrix] fetch downloading task list fail:', err)
+        console.log('[GLD] fetch downloading task list fail:', err)
         reject(err)
       })
     })

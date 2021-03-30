@@ -17,7 +17,8 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": ""
+    "postinstall": "",
+    "dist": "build"
   },
   "build": {
     "productName": "gldownload",
@@ -44,19 +45,77 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "type": "distribution",
+      "darkModeSupport": true,
+      "hardenedRuntime": true,
+      "extraResources": {
+        "from": "./extra/darwin/",
+        "to": "./",
+        "filter": [
+          "**/*"
+        ]
+      },
+      "category": "public.app-category.utilities"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "extraResources": {
+        "from": "./extra/win32/",
+        "to": "./",
+        "filter": [
+          "**/*"
+        ]
+      }
     },
     "linux": {
       "icon": "build/icons"
     }
   },
   "dependencies": {
+    "aria2": "^4.1.2",
     "axios": "^0.18.0",
+    "bufferutil": "^4.0.3",
     "electron-is": "^3.0.0",
     "element-ui": "^2.15.1",
+    "utf-8-validate": "^5.0.4",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",

@@ -20,17 +20,12 @@ const mutations = {
 
 const actions = {
     fetchList({commit, state}) {
-        console.log('fetch list')
         return api.fetchTaskList({type: state.currentList})
             .then((data) => {
                 commit('UPDATE_TASK_OBJ', data)
-
-                state.tasksObj = data
-                console.log('task fetchList:', data)
             })
     },
     addUri({dispatch}, data) {
-        console.log('add URI')
         const uris = [DOWNLOAD_URL]
         let options = {}
         options.dir = "F:\something"

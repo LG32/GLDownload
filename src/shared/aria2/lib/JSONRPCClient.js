@@ -151,9 +151,7 @@ export class JSONRPCClient extends EventEmitter {
     console.log('json rpc client:', this.url('ws'))
     const socket = new WebSocket(this.url('ws'))
     console.log('json rpc client socket:', socket.readyState)
-    // const socket = (
-        this.socket = socket
-    // )
+    this.socket = socket
 
     socket.onclose = (...args) => {
       this.emit('close', ...args)
@@ -187,7 +185,7 @@ export class JSONRPCClient extends EventEmitter {
   defaultOptions = {
     secure: false,
     host: 'localhost',
-    port: 16800,
+    port: 80,
     secret: '',
     path: '/jsonrpc',
     fetch,

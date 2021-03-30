@@ -23,11 +23,11 @@ export const TASK_STATUS = {
     SEEDING: 'seeding'
 }
 
-export const DOWNLOAD_URL = "https://download-cf.jetbrains.com/objc/AppCode-2020.3.4.dmg"
+export const DOWNLOAD_URL = "http://qaipa.ijunhai.com:8080/up/%E9%BB%8E%E6%98%8E%E8%88%AA%E7%BA%BFBT2_%E6%B8%B8%E6%88%8FFAN_%E6%96%B0__5.8_202103301529.apk"
 
 export const ENGINE_RPC_HOST = '127.0.0.1'
 
-export const ENGINE_RPC_PORT = 16800
+export const ENGINE_RPC_PORT = 6800
 
 export const APP_ICON = ""
 
@@ -86,4 +86,13 @@ export const intersection = (array1 = [], array2 = []) => {
     }
 
     return array1.filter(value => array2.includes(value))
+}
+
+export const bytesToSize = (bytes) => {
+    const b = parseInt(bytes, 10)
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+    if (b === 0) { return '0 KB' }
+    const i = parseInt(Math.floor(Math.log(b) / Math.log(1024)), 10)
+    if (i === 0) { return `${b} ${sizes[i]}` }
+    return `${(b / (1024 ** i)).toFixed(1)} ${sizes[i]}`
 }
