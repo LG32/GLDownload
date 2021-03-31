@@ -25,10 +25,10 @@ const actions = {
                 commit('UPDATE_TASK_OBJ', data)
             })
     },
-    addUri({dispatch}, data) {
+    addUri({dispatch}, filePath) {
         const uris = [DOWNLOAD_URL]
         let options = {}
-        options.dir = "F:\something"
+        options.dir = filePath
         options.split = 64
         let outs = {}
 
@@ -52,8 +52,7 @@ const actions = {
                 })
         })
     },
-    pauseTask({dispatch}, task) {
-        const {gid} = task
+    pauseTask({dispatch}, gid) {
         return api.pauseTask({gid})
             .catch(() => {
                 return api.forcePauseTask({gid})
@@ -63,9 +62,15 @@ const actions = {
                 dispatch('saveSession')
             })
     },
-    resumeTask({dispatch}, task) {
-        const {gid} = task
+    resumeTask({dispatch}, gid) {
         return api.resumeTask({gid})
+            .finally(() => {
+                dispatch('fetchList')
+                dispatch('saveSession')
+            })
+    },
+    removeTask ({ dispatch }, gid) {
+        return api.removeTask({ gid })
             .finally(() => {
                 dispatch('fetchList')
                 dispatch('saveSession')

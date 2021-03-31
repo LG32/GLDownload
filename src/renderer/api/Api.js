@@ -275,7 +275,9 @@ export default class Api {
 
   removeTask (params = {}) {
     const { gid } = params
+    console.log('removeTask api', gid)
     const args = compactUndefined([gid])
+    console.log('removeTask api', args)
     return this.client.call('remove', ...args)
   }
 

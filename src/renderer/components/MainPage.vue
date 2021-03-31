@@ -1,15 +1,24 @@
 <template>
   <div id="MainPage">
-    <!--       style="-webkit-app-region:drag">-->
     <div id="wrapper">
       <img src="../../img/banner.png" alt="" id="banner">
       <div class="bottom">
-        <div class="bottomTitle">下载速度:{{ speed }}</div>
-        <el-progress :text-inside="true"
-                     :stroke-width="16"
-                     :percentage="downloadProgress"
-                     :color="customColor"></el-progress>
-        <el-button type="primary" @click="addTask()">下载<i class="el-icon-download el-icon--right"></i></el-button>
+        <div v-if="startDownloadFlag">
+          <div class="bottomTitle">下载速度:{{ speed }}</div>
+          <div class="iconLine">
+            <el-row>
+              <el-button @click="pauseTask()" icon="el-icon-video-pause" circle></el-button>
+              <el-button @click="resumeTask()" icon="el-icon-video-play" circle></el-button>
+              <el-button @click="clickRemoveTask()" icon="el-icon-close" circle></el-button>
+            </el-row>
+          </div>
+          <el-progress :text-inside="true"
+                       :stroke-width="16"
+                       :percentage="downloadProgress"
+                       :color="customColor"
+                       style="pointer-events:none"></el-progress>
+        </div>
+        <file-module v-else v-on:startDownload="startDownload"></file-module>
       </div>
     </div>
   </div>
@@ -18,12 +27,17 @@
 <script>
 import {mapState, mapActions} from "vuex";
 import {bytesToSize} from "../../utils.js";
-import api from "../api";
+import fileModule from "./FileModule"
 
 export default {
   name: "MainPage",
   data() {
     return {
+      fileForm: {
+        moveFileList: [],
+        filePath: '',
+        searchFilePath: ''
+      },
       backgroundDiv: {
         backgroundImage: 'url(' + require('../../img/banner.png') + ')',
         backgroundRepeat: 'no-repeat',
@@ -35,10 +49,15 @@ export default {
       status: null,
       timer: null,
       speed: 0,
-      downloadProgress: 0
+      downloadProgress: 0,
+      startDownloadFlag: false,
+      gid: undefined
     }
   },
 
+  components: {
+    [fileModule.name]: fileModule
+  },
   computed: {
     ...mapState('task', {
       taskObj: state => state.taskObj,
@@ -46,11 +65,6 @@ export default {
       selectedGidListCount: state => state.selectedGidList.length
     }),
   },
-
-  watch: {
-    this: {}
-  },
-
   created: function () {
     console.log('created clock')
     this.timer = setInterval(this.flush, 1000)
@@ -67,11 +81,13 @@ export default {
     format(percentage) {
       return percentage === 100 ? '满' : `${percentage}%`;
     },
-    addTask(type, form) {
-      console.log('addTask')
-      this.$store.dispatch('task/addUri')
+    addTask() {
+      let that = this;
+      console.log('addTask', that.fileForm.filePath)
+      this.$store.dispatch('task/addUri', that.fileForm.filePath)
           .then((task) => {
             console.log('addTask after task is:', task)
+            this.gid = task.gid
           })
     },
     flush() {
@@ -92,10 +108,90 @@ export default {
       this.totalLength = totalLength
       this.status = task.status
       this.speed = speed
-      this.gid = task.gid
       this.downloadProgress = parseInt(downloadProgress)
       console.log('downloadProgress', typeof downloadProgress)
     },
+    fileChange(e) {
+      try {
+        const fu = document.getElementById('targetFile')
+        console.log('fileChange change', fu)
+        if (fu == null) return
+        const that = this
+        let tbl = that.tableData
+        let target = fu.files[0].path
+        for (let i = 0; i < tbl.length; i++) {
+          tbl[i].target_address = target
+        }
+        that.fileForm.filePath = target
+        that.tableData = tbl
+        console.log('fileChange1:', that.fileForm.filePath)
+      } catch (error) {
+        console.debug('choice file err:', error)
+      }
+    },
+
+    startDownload(filePath) {
+      if (filePath === '') {
+        this.$message.error('请选择下载路径')
+        return
+      }
+      let that = this
+      that.startDownloadFlag = true
+      that.fileForm.filePath = filePath
+      that.addTask()
+    },
+    pauseTask() {
+      let gid = this.gid
+      if (typeof gid === 'undefined') {
+        let task = this.taskObj
+        gid = task.gid
+        this.gid = gid
+      }
+
+      this.$message({
+        message: '暂停下载',
+        type: 'warning'
+      });
+      this.$store.dispatch('task/pauseTask', gid)
+    },
+    resumeTask() {
+      let gid = this.gid
+      this.$message({
+        message: '恢复下载',
+        type: 'success'
+      });
+      this.$store.dispatch('task/resumeTask', gid)
+    },
+    clickRemoveTask() {
+      this.$confirm('此操作将取消下载并删除该文件, 是否继续?', '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+        this.removeTask()
+        this.$message({
+          type: 'success',
+          message: '取消下载!'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        });
+      });
+    },
+    removeTask() {
+      let that = this
+      let gid = that.gid
+      if (typeof gid === 'undefined') {
+        let task = this.taskObj
+        gid = task.gid
+        this.gid = gid
+      }
+      that.startDownloadFlag = false
+      this.$store.dispatch('task/removeTask', gid)
+    }
   }
 }
 </script>
@@ -108,13 +204,19 @@ export default {
 }
 
 #banner {
-//-moz-user-select: none; //-webkit-user-select: none; //-ms-user-select: none; //-khtml-user-select: none; //user-select: none; //-webkit-user-drag: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-app-region: drag;
+  pointer-events: none
 }
 
 .bottom {
   width: 1000px;
-//height: 100px; margin: 0 50px 0 375px; overflow: auto; position: absolute;
-  bottom: 60px;
+  -webkit-app-region: no-drag;
 }
 
 .bottomTitle {
@@ -122,6 +224,11 @@ export default {
   text-shadow: #000 2px 2px 2px;
   color: #fff;
   font-weight: bold;
+}
+
+.iconLine {
+  float: right;
+  margin-right: 10px;
 }
 
 </style>
